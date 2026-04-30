@@ -5,10 +5,14 @@ import { useAuth } from '../lib/AuthContext'
 
 export default function Home() {
   const [trending, setTrending] = useState([])
+  const [loading, setLoading] = useState(true)
   const { user } = useAuth()
 
   useEffect(() => {
-    getTrending().then(setTrending).catch(console.error)
+    getTrending()
+      .then(setTrending)
+      .catch(console.error)
+      .finally(() => setLoading(false))
   }, [])
 
   return (
@@ -39,24 +43,56 @@ export default function Home() {
           🔥 Trending This Week
         </h2>
         <div style={{ display: 'flex', gap: '1rem', overflowX: 'auto', paddingBottom: '1rem' }}>
-          {trending.slice(0, 12).map(movie => (
-            <div key={movie.id} style={{ flexShrink: 0, width: '130px' }}>
-              {movie.poster_path ? (
-                <img
-                  src={getPosterUrl(movie.poster_path, 'w300')}
-                  alt={movie.title}
-                  style={{ width: '100%', borderRadius: '6px', display: 'block' }}
-                />
-              ) : (
-                <div style={{ width: '130px', height: '195px', backgroundColor: '#222', borderRadius: '6px' }} />
-              )}
-              <p style={{ fontSize: '0.75rem', color: '#aaa', marginTop: '0.4rem', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                {movie.title}
-              </p>
-            </div>
-          ))}
+          {loading
+            ? Array.from({ length: 12 }).map((_, i) => (
+                <div key={i} style={{ flexShrink: 0, width: '130px' }}>
+                  <div style={{
+                    width: '130px',
+                    height: '195px',
+                    backgroundColor: '#1a1a1a',
+                    borderRadius: '6px',
+                    background: 'linear-gradient(90deg, #1a1a1a 25%, #252525 50%, #1a1a1a 75%)',
+                    backgroundSize: '200% 100%',
+                    animation: 'shimmer 1.4s infinite',
+                  }} />
+                  <div style={{
+                    height: '12px',
+                    backgroundColor: '#1a1a1a',
+                    borderRadius: '4px',
+                    marginTop: '0.5rem',
+                    width: '80%',
+                    background: 'linear-gradient(90deg, #1a1a1a 25%, #252525 50%, #1a1a1a 75%)',
+                    backgroundSize: '200% 100%',
+                    animation: 'shimmer 1.4s infinite',
+                  }} />
+                </div>
+              ))
+            : trending.slice(0, 12).map(movie => (
+                <div key={movie.id} style={{ flexShrink: 0, width: '130px' }}>
+                  {movie.poster_path ? (
+                    <img
+                      src={getPosterUrl(movie.poster_path, 'w300')}
+                      alt={movie.title}
+                      style={{ width: '100%', borderRadius: '6px', display: 'block' }}
+                    />
+                  ) : (
+                    <div style={{ width: '130px', height: '195px', backgroundColor: '#222', borderRadius: '6px' }} />
+                  )}
+                  <p style={{ fontSize: '0.75rem', color: '#aaa', marginTop: '0.4rem', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                    {movie.title}
+                  </p>
+                </div>
+              ))
+          }
         </div>
       </div>
+
+      <style>{`
+        @keyframes shimmer {
+          0% { background-position: 200% 0; }
+          100% { background-position: -200% 0; }
+        }
+      `}</style>
     </div>
   )
 }
